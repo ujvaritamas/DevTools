@@ -1,0 +1,35 @@
+https://stackoverflow.com/questions/43041331/docker-forever-in-docker-is-starting-at-windows-task
+
+helm search
+
+helm add
+
+repo
+helm install
+helm status
+helm show values <>
+
+helm get values <release name>
+
+helm show values bitnami/wordpress
+$ echo '{mariadb.auth.database: user0db, mariadb.auth.username: user0}' > values.yaml
+$ helm install -f values.yaml bitnami/wordpress --generate-name
+
+--set
+--set cleared if helm update --reset-values
+
+helm list -> see deployed releases
+helm list --all
+
+helm repo list
+helm repo add
+helm repo update
+helm repo remove
+
+
+creating chart:
+helm create <name>
+helm lint -validation
+helm package <name>   -> create tgz
+
+after that it can be installed from the tgz
