@@ -1,0 +1,368 @@
+mkdir hello
+go mod init example/hello   enable dependency tracking
+
+go run .
+
+import <package>
+go mod tidy   ->add external module to the mod file
+
+
+https://go.dev/doc/tutorial/create-module
+
+go code gruped into packages, packages grouped into modules
+
+In Go, a function whose name starts with a capital letter can be called by a function not in the same package. This is known in Go as an exported name.
+
+go mod edit -replace example.com/greetings=../greetings     (local file system)
+go mod tidyffranNname
+
+_test.go
+
+go test
+
+
+https://go.dev/tour/list
+
+https://go.dev/doc/effective_go
+
+go return value can be named
+func split(sum int) (x, y int) {
+	x = sum * 4 / 9
+	y = sum - x
+	return
+}
+
+var can be package level or function level
+
+
+A defer statement defers the execution of a function until the surrounding function returns.
+
+panic defer recover
+
+y :=32
+
+x := &y
+
+var x *int
+
+type Vertex struct {
+	X int
+	Y int
+}
+
+Vertex{1, 2}
+v := Vertex{1, 2}
+
+slice (length + capacity)
+
+len(s) - slice length
+cap(s)  - size of underlying array
+
+a := []int{1,2,3}
+fmt.Println(a[:2])
+
+create a slice with make
+a := make([]int, 5)  // len(a)=5
+b := make([]int, 0, 5) // len(b)=0, cap(b)=5
+
+appending to a slice
+func append(s []T, vs ...T) []T
+
+s = append(s, 1,7)
+
+func copy(dst, src []T) int
+
+range -> iterate through slice or map (index, copy of the element) (key value)
+
+for _, value := range pow {
+		fmt.Printf("%d\n", value)
+	}
+
+var m map[string]Vertex
+
+m = make(map[string]Vertex)
+m[key] = elem
+delete(m, key)
+
+elem, ok = m[key]		//If key is in m, ok is true. If not, ok is false.
+
+func compute(fn func(float64, float64) float64) float64 {
+	return fn(3, 4)
+}
+
+func main() {
+	hypot := func(x, y float64) float64 {
+		return math.Sqrt(x*x + y*y)
+	}
+	fmt.Println(hypot(5, 12))
+
+	fmt.Println(compute(hypot))
+	fmt.Println(compute(math.Pow))
+}
+
+
+can't define class
+
+but can define types and methods on types
+
+type T struct {
+	x int
+	y string
+}
+// Remember: a method is just a function with a receiver argument.
+func (t T) methodName() int {			//t is copy if a  (better to use pointer receiver)
+
+}
+
+a := T {3, "ll"}
+a.methodName()
+method can be daclared on non-struct type  (you can only declare a method with a receiver whose type is defined in the same package as the method. You cannot declare a method with a receiver whose type is defined in another package (which includes the built-in types such as int).)
+
+func (t *T) methodName() int {			//if modify t the original varaiable also modified
+
+}
+
+
+Interfaces
+	An interface type is defined as a set of method signatures.
+
+type Abser interface {
+	Abs() float64
+}
+
+https://go.dev/tour/methods/9
+
+Interfaces are implemented implicitly
+A type implements an interface by implementing its methods. There is no explicit declaration of intent, no "implements" keyword.
+
+Implicit interfaces decouple the definition of an interface from its implementation, which could then appear in any package without prearrangement.
+
+
+generics
+func Index[T comparable](s []T, x T) int
+
+type List[T any] struct {
+	next *List[T]
+	val  T
+}
+
+concurrency: (goroutine)	https://go.dev/tour/concurrency/1
+	go f(x, y, z)
+
+	channels:
+		ch := make(chan int)		// must be created before use
+		ch <- v    // Send v to channel ch.
+		v := <-ch  // Receive from ch, and
+           // assign value to v.
+
+func sum(s []int, c chan int) {
+	sum := 0
+	for _, v := range s {
+		sum += v
+	}
+	c <- sum //send sum to c
+}
+
+By default, sends and receives block until the other side is ready. This allows goroutines to synchronize without explicit locks or condition variables.
+
+channel can be buffered
+ch := make(chan int, 100)	//Sends to a buffered channel block only when the buffer is full. Receives block when the buffer is empty.
+A sender can close a channel to indicate that no more values will be sent. Receivers can test whether a channel has been closed by assigning a second parameter to the receive expression: after
+v, ok := <-ch
+Note: Only the sender should close a channel, never the receiver. Sending on a closed channel will cause a panic.
+
+func fibonacci(n int, c chan int) {
+	x, y := 0, 1
+	for i := 0; i < n; i++ {
+		c <- x
+		x, y = y, x+y
+	}
+	close(c)
+}
+
+func main() {
+	c := make(chan int, 10)
+	go fibonacci(cap(c), c)
+	for i := range c {
+		fmt.Println(i)
+	}
+}
+
+The select statement lets a goroutine wait on multiple communication operations.
+
+import "fmt"
+
+func fibonacci(c, quit chan int) {
+	x, y := 0, 1
+	for {
+		select {
+		case c <- x:
+			x, y = y, x+y
+		case <-quit:
+			fmt.Println("quit")
+			return
+		}
+	}
+}
+
+func main() {
+	c := make(chan int)
+	quit := make(chan int)
+	go func() {
+		for i := 0; i < 10; i++ {
+			fmt.Println(<-c)
+		}
+		quit <- 0
+	}()
+	fibonacci(c, quit)
+}
+
+package main
+
+import (
+	"fmt"
+	"time"
+)
+
+func r0(r, s chan int) {
+	x := 0
+	fmt.Println("r0 started")
+	for {
+		time.Sleep(1 * time.Second)
+		select {
+		case x := <-r:
+			fmt.Println("r0 received: ", x)
+		case s <- x:
+			fmt.Println("r0 sent: ", x)
+			x += 1
+
+			if x == 3 {
+				return
+			}
+		}
+	}
+
+}
+
+func r1(r, s chan int) {
+	x := 0
+	fmt.Println("r1 started")
+	for {
+		time.Sleep(1 * time.Second)
+		select {
+		case x := <-r:
+			fmt.Println("r1 received: ", x)
+		case s <- x:
+			fmt.Println("r1 sent: ", x)
+			x += 1
+
+			if x == 3 {
+				return
+			}
+		}
+	}
+}
+
+func main() {
+
+	ch0 := make(chan int)
+	ch1 := make(chan int)
+	fmt.Println("hhh")
+	go r0(ch0, ch1)
+	time.Sleep(1 * time.Second)
+	go r1(ch1, ch0)
+	time.Sleep(15 * time.Second)
+}
+
+sync.Mutex
+
+type SafeCounter struct {
+	mu sync.Mutex
+	v  map[string]int
+}
+// Inc increments the counter for the given key.
+func (c *SafeCounter) Inc(key string) {
+	c.mu.Lock()
+	// Lock so only one goroutine at a time can access the map c.v.
+	c.v[key]++
+	c.mu.Unlock()
+}
+
+// Value returns the current value of the counter for the given key.
+func (c *SafeCounter) Value(key string) int {
+	c.mu.Lock()
+	// Lock so only one goroutine at a time can access the map c.v.
+	defer c.mu.Unlock()
+	return c.v[key]
+}
+
+
+WaitGroup (like join)
+
+package main
+
+import (
+	"fmt"
+	"sync"
+)
+
+func f1(name string, wg *sync.WaitGroup) {
+	fmt.Println(name)
+	wg.Done()
+}
+
+func main() {
+	var wg sync.WaitGroup
+	wg.Add(1)
+
+	go f1("tt", &wg)
+
+	wg.Wait()
+	defer fmt.Println("Main finished")
+}
+
+
+mutex
+
+package main
+
+import (
+	"fmt"
+	"sync"
+	"time"
+)
+
+var counter int
+
+var mutex sync.Mutex
+
+func main() {
+
+	for i := 0; i < 1000; i++ {
+		go increment()
+	}
+
+	time.Sleep(time.Second * 5)
+	fmt.Println(counter)
+}
+
+func increment() {
+
+	mutex.Lock()
+	counter++
+	mutex.Unlock()
+}
+
+
+rwLock sync.RWMutex   ///great for read intensive programs
+
+//in the read function  (other read can read only blocked if Lock() called)
+rwLock.RLock()
+defer rwLock.RUnlock()
+
+//in the write function
+rwLock.Lock()
+defer rwLock.Unlock()
+
+
+once.Do()
