@@ -75,7 +75,7 @@ Credentials: Click on "Add" to add SSH credentials for connecting to the Jenkins
 Kind: Username with password
 Scope: Global
 Username: Enter the SSH username (e.g., jenkins).
-Password: Enter the SSH password (e.g., password).
+Password: Enter the SSH password (e.g., rootroot).
 ID: Provide an ID for the credentials.
 Description: Optionally, provide a description for the credentials.
 
