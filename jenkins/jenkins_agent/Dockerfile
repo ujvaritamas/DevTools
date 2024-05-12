@@ -12,7 +12,8 @@ RUN apt-get update \
     && useradd -rm -d /home/jenkins -s /bin/bash -g root -G sudo jenkins \
     && echo 'jenkins:rootroot' | chpasswd \
     && apt-get install -y openjdk-17-jre \
-    && apt-get install -y openjdk-17-jdk
+    && apt-get install -y openjdk-17-jdk \
+    && apt-get install -y git
 
 ENV JAVA_HOME=/usr/local/java
 ENV PATH=${PATH}:${JAVA_HOME}/bin

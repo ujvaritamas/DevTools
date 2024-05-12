@@ -6,5 +6,14 @@ pipeline {
                 sh 'echo hello'
             }
         }
+        stage('Test python'){
+            steps{
+                sh '''
+                    echo "Multiline shell steps works too"
+                    ls -lah
+                    python3 jenkins/example_python/tt.py
+                '''
+            }
+        }
     }
 }
