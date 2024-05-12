@@ -1,0 +1,29 @@
+version: '3'
+
+services:
+  jenkinscontroller:
+    build:
+      context: ./jenkins_controller
+    ports:
+      - "8080:8080"
+      - "50000:50000"
+    volumes:
+      - jenkins_home:/var/jenkins_home
+    hostname: jenkinscontroller
+    restart: always
+
+  jenkins-agent:
+    build:
+      context: ./jenkins_agent
+    environment:
+      - SSH_USERNAME=jenkins
+      - SSH_PASSWORD=rootroot
+      - SSH_HOST=jenkinscontroller
+      - SSH_PORT=22
+    depends_on:
+      - jenkinscontroller
+    hostname: jenkinsagent
+    restart: always
+
+volumes:
+  jenkins_home:
