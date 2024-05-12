@@ -4,6 +4,7 @@ pipeline {
         stage('Test') {
             steps {
                 sh 'echo hello ${BUILD_NUMBER}'
+                sh 'echo $JENKINS_URL'
             }
         }
         stage('Test python'){
